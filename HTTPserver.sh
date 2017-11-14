@@ -1,2 +1,2 @@
 echo "Starting HTTP server"
-cd public_html && python -m SimpleHTTPServer 8090
+cd ./dump1090/public_html && python -m SimpleHTTPServer 8090

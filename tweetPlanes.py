@@ -4,10 +4,18 @@ import json, time, tweepy
 import geopy.distance
 from pprint import pprint
 from weatherbit.api import Api
+import Adafruit_BBIO.GPIO as GPIO
 
 #api_key = "d2c8237889574c27a0b2e2f74a0d512e"
 #api = Api(api_key)
 #api.set_granularity('3hourly')
+
+
+
+BUZZER   ="RED"
+
+# Set the GPIO pins:
+GPIO.setup(BUZZER,GPIO.OUT)
 
 cfg = { 
     "consumer_key"        : "Gvk6OlzK9C0O7rOB0Grje1BBz",
@@ -28,10 +36,11 @@ roseCoords = (rlat, rlon)
 #print(forecast)
 
 seenPlanes = [ ]
-displayDistance = 20
+displayDistance = 50
+buzzTime = 1
 
 while True:
-    with open('./public_html/data/aircraft.json') as data_file:    
+    with open('./dump1090/public_html/data/aircraft.json') as data_file:    
         data = json.load(data_file)
     i = 0
     for plane in data["aircraft"]:
@@ -41,14 +50,16 @@ while True:
             if plane["flight"] not in seenPlanes:
                 if distance < displayDistance:
                     dis = str(int(distance*1000)/1000.0)
-                    flight = str(plane["flight"]).lower()
+                    flight = str(plane["flight"])
                     flight = ''.join(flight.split())
                     speed = str(plane["speed"])
                     alt = str(plane["altitude"])
-                    tweet = "Flight #"+flight+" spotted "+dis+" miles from Rose-Hulman, traveling "+speed+" mph at "+alt+" ft http://flightaware.com/live/modes/"+flight+"/redirect"
+                    tweet = "Flight #"+flight+" spotted "+dis+" miles from Rose-Hulman, traveling "+speed+" mph at "+alt+" ft http://flightaware.com/live/flight/"+flight
                     print(tweet)
                     status = twitter.update_status(status=tweet)
+                    GPIO.output(BUZZER, 1)
+                    time.sleep(buzzTime)
+                    GPIO.output(BUZZER,0)
                     seenPlanes.append(plane["flight"])
-
 
     time.sleep(1)
